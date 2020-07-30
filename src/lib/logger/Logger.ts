@@ -27,28 +27,30 @@ const LOG_LEVEL = {
 };
 
 
+const _printF = (info:any): string => {
+  let msg: string;
+  if (info.durationMs || info.durationMs===0) {
+    msg = `    |profiling| Performing [${info.message.trim()}] in [${info.durationMs}] milisec`
+  } else {
+    msg = info.message;
+  }
+  return `${info.timestamp}|${info.level}${msg}`
+}
+
 const _format = (): any => {
 
   if (env.isProduction) return format.combine(format.colorize(), format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss.SSS'
-  }), format.padLevels(), format.printf(info => `${info.timestamp}|${info.level}${info.message}`));
+  }), format.padLevels(), format.printf(info => _printF(info)));
 
   return format.combine(format.colorize(), format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss.SSS'
-  }), format.padLevels(), format.printf(info => {
-    let msg: string;
-    if (info.durationMs || info.durationMs===0) {
-      msg = `    |profiling| Performing [${info.message.trim()}] in [${info.durationMs}] milisec`
-    } else {
-      msg = info.message;
-    }
-    return `${info.timestamp}|${info.level}${msg}`}))
+  }), format.padLevels(), format.printf(info => _printF(info)))
 };
 
 export const consoleTransport = new transports.Console({
   level: env.log.level,
   handleExceptions: true,
-  // format: env.node !== 'development' ? format.combine(format.json()) : format.combine(format.colorize(), format.simple()),
   format: _format(),
   silent: env.isTest
 });
