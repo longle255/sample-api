@@ -1,6 +1,7 @@
 import * as path from 'path';
-import { format, formatWithOptions } from 'util';
+import { format as formatUtil, formatWithOptions } from 'util';
 import * as winston from 'winston';
+import { format as format, transports } from 'winston';
 
 import { env } from '../../env';
 import { paddingRight } from '../../utils';
@@ -24,6 +25,37 @@ const LOG_LEVEL = {
   warn: 2,
   error: 1,
 };
+
+
+const _printF = (info:any): string => {
+  let msg: string;
+  if (info.durationMs || info.durationMs===0) {
+    msg = `    |profiling| Performing [${info.message.trim()}] in [${info.durationMs}] milisec`
+  } else {
+    msg = info.message;
+  }
+  return `${info.timestamp}|${info.level}${msg}`
+}
+
+const _format = (): any => {
+
+  if (env.isProduction) return format.combine(format.colorize(), format.timestamp({
+    format: 'YYYY-MM-DD HH:mm:ss.SSS'
+  }), format.padLevels(), format.printf(info => _printF(info)));
+
+  return format.combine(format.colorize(), format.timestamp({
+    format: 'YYYY-MM-DD HH:mm:ss.SSS'
+  }), format.padLevels(), format.printf(info => _printF(info)))
+};
+
+export const consoleTransport = new transports.Console({
+  level: env.log.level,
+  handleExceptions: true,
+  format: _format(),
+  silent: env.isTest
+});
+
+
 export class Logger {
 
   public winston= winston;
@@ -44,6 +76,8 @@ export class Logger {
   }
 
   private scope: string;
+
+  private winston: winston.Logger;
 
   constructor(scope?: string) {
     this.scope = Logger.parsePathToScope(scope ? scope : Logger.DEFAULT_SCOPE);
@@ -73,12 +107,17 @@ export class Logger {
     this.log('error', message, args);
   }
 
+  public getWinston(): winston.Logger {
+    if (!this.winston) this.winston = winston.createLogger({transports: consoleTransport});
+    return this.winston;
+  }
+
   private log(level: string, message: any, args: any[]): void {
     if (LOG_LEVEL[level] > LOG_LEVEL[env.log.level]) {
       return;
     }
 
-    const formattedArgs = env.isProduction ? format(message, args) : formatWithOptions({ colors: true }, message, args);
+    const formattedArgs = env.isProduction ? formatUtil(message, args) : formatWithOptions({ colors: true }, message, args);
 
     if (winston) {
       winston[level](
