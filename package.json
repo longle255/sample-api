@@ -71,7 +71,7 @@
 		"mongoose": "^5.9.19",
 		"morgan": "^1.10.0",
 		"node-ssh": "^10.0.2",
-		"nodemailer": "^6.4.10",
+		"nodemailer": "^6.4.16",
 		"nodemailer-mailgun-transport": "^2.0.0",
 		"nodemailer-sendgrid": "^1.0.3",
 		"nodemon": "^2.0.4",
