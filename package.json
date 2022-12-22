@@ -53,7 +53,7 @@
 		"http-errors": "^1.7.3",
 		"javascript-natural-sort": "^0.7.1",
 		"jsonfile": "5.0.0",
-		"jsonwebtoken": "^8.5.1",
+		"jsonwebtoken": "^9.0.0",
 		"kcors": "^2.2.2",
 		"koa": "^2.12.1",
 		"koa-basic-auth": "^4.0.0",
